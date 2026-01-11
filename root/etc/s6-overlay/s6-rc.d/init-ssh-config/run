@@ -1,0 +1,81 @@
+#!/usr/bin/with-contenv bash
+# SSH and Claude Code initialization script
+# Handles persistence of SSH keys, user password, and Claude credentials
+
+# Create persistent directories
+mkdir -p /config/ssh
+mkdir -p /config/claude-profile
+mkdir -p /config/ssh/user_keys
+
+# ============================================
+# SSH Host Key Persistence
+# ============================================
+# Check if persistent host keys exist
+if [ ! -f /config/ssh/ssh_host_ed25519_key ]; then
+    echo "[init-ssh-config] Generating new SSH host keys..."
+    ssh-keygen -t ed25519 -f /config/ssh/ssh_host_ed25519_key -N ""
+    ssh-keygen -t rsa -b 4096 -f /config/ssh/ssh_host_rsa_key -N ""
+    chown root:root /config/ssh/ssh_host_*
+    chmod 600 /config/ssh/ssh_host_*_key
+    chmod 644 /config/ssh/ssh_host_*_key.pub
+else
+    echo "[init-ssh-config] Using existing SSH host keys from /config/ssh/"
+fi
+
+# Remove any existing ephemeral host keys and symlink persistent ones
+rm -f /etc/ssh/ssh_host_*
+ln -sf /config/ssh/ssh_host_ed25519_key /etc/ssh/ssh_host_ed25519_key
+ln -sf /config/ssh/ssh_host_ed25519_key.pub /etc/ssh/ssh_host_ed25519_key.pub
+ln -sf /config/ssh/ssh_host_rsa_key /etc/ssh/ssh_host_rsa_key
+ln -sf /config/ssh/ssh_host_rsa_key.pub /etc/ssh/ssh_host_rsa_key.pub
+
+# ============================================
+# User SSH Keys Persistence
+# ============================================
+# Setup authorized_keys persistence for abc user
+if [ ! -d /home/abc ]; then
+    mkdir -p /home/abc
+fi
+
+if [ -d /home/abc/.ssh ] && [ ! -L /home/abc/.ssh ]; then
+    # If .ssh exists and is not a symlink, move contents to persistent storage
+    cp -rn /home/abc/.ssh/* /config/ssh/user_keys/ 2>/dev/null || true
+    rm -rf /home/abc/.ssh
+fi
+
+ln -sf /config/ssh/user_keys /home/abc/.ssh
+chown -R abc:abc /config/ssh/user_keys 2>/dev/null || true
+
+# ============================================
+# Claude Code Profile Persistence
+# ============================================
+# Symlink Claude config directory for persistence
+if [ -d /home/abc/.claude ] && [ ! -L /home/abc/.claude ]; then
+    cp -rn /home/abc/.claude/* /config/claude-profile/ 2>/dev/null || true
+    rm -rf /home/abc/.claude
+fi
+
+ln -sf /config/claude-profile /home/abc/.claude
+chown -R abc:abc /config/claude-profile
+
+# ============================================
+# Password Configuration
+# ============================================
+if [ -n "$PASSWORD" ]; then
+    echo "[init-ssh-config] Setting password for user 'abc' from PASSWORD environment variable"
+    echo "abc:$PASSWORD" | chpasswd
+else
+    # Generate random password if not provided
+    RANDOM_PASS=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 16)
+    echo "abc:$RANDOM_PASS" | chpasswd
+    echo "============================================"
+    echo "[init-ssh-config] WARNING: No PASSWORD env var set!"
+    echo "[init-ssh-config] Generated random password for 'abc': $RANDOM_PASS"
+    echo "[init-ssh-config] Set PASSWORD env var to use a custom password"
+    echo "============================================"
+fi
+
+# Ensure abc user has a valid shell
+usermod -s /bin/bash abc 2>/dev/null || true
+
+echo "[init-ssh-config] SSH configuration complete"

@@ -1,0 +1,3 @@
+#!/command/execlineb -P
+# SSH daemon service - runs in foreground for s6 supervision
+/usr/sbin/sshd -D -e
