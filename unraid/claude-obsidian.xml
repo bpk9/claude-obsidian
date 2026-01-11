@@ -20,7 +20,7 @@
   <Category>Productivity: Tools:AI</Category>
   <WebUI>http://[IP]:[PORT:3000]/</WebUI>
   <Icon>https://raw.githubusercontent.com/bpk9/claude-obsidian/master/icon.png</Icon>
-  <ExtraParams/>
+  <ExtraParams>--shm-size=1gb</ExtraParams>
   <PostArgs/>
   <DonateText/>
   <DonateLink/>

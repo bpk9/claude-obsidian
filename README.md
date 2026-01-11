@@ -22,6 +22,7 @@ A "fat container" combining [Obsidian](https://obsidian.md/) (GUI knowledge base
 ```bash
 docker run -d \
   --name claude-obsidian \
+  --shm-size=1gb \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=America/New_York \
@@ -40,6 +41,7 @@ services:
   claude-obsidian:
     image: bpk9/claude-obsidian:latest
     container_name: claude-obsidian
+    shm_size: "1gb"
     environment:
       - PUID=1000
       - PGID=1000
