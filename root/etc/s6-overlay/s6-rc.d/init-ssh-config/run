@@ -2,6 +2,19 @@
 # SSH and Claude Code initialization script
 # Handles persistence of SSH keys, user password, and Claude credentials
 
+# ============================================
+# Username Configuration
+# ============================================
+USER_NAME="${USER_NAME:-abc}"
+
+# Rename user if custom username is specified
+if [ "$USER_NAME" != "abc" ]; then
+    echo "[init-ssh-config] Renaming user 'abc' to '$USER_NAME'..."
+    usermod -l "$USER_NAME" abc
+    groupmod -n "$USER_NAME" abc
+    usermod -d "/home/$USER_NAME" -m "$USER_NAME"
+fi
+
 # Create persistent directories
 mkdir -p /config/ssh
 mkdir -p /config/claude-profile
@@ -32,50 +45,50 @@ ln -sf /config/ssh/ssh_host_rsa_key.pub /etc/ssh/ssh_host_rsa_key.pub
 # ============================================
 # User SSH Keys Persistence
 # ============================================
-# Setup authorized_keys persistence for abc user
-if [ ! -d /home/abc ]; then
-    mkdir -p /home/abc
+# Setup authorized_keys persistence for user
+if [ ! -d "/home/$USER_NAME" ]; then
+    mkdir -p "/home/$USER_NAME"
 fi
 
-if [ -d /home/abc/.ssh ] && [ ! -L /home/abc/.ssh ]; then
+if [ -d "/home/$USER_NAME/.ssh" ] && [ ! -L "/home/$USER_NAME/.ssh" ]; then
     # If .ssh exists and is not a symlink, move contents to persistent storage
-    cp -rn /home/abc/.ssh/* /config/ssh/user_keys/ 2>/dev/null || true
-    rm -rf /home/abc/.ssh
+    cp -rn "/home/$USER_NAME/.ssh/"* /config/ssh/user_keys/ 2>/dev/null || true
+    rm -rf "/home/$USER_NAME/.ssh"
 fi
 
-ln -sf /config/ssh/user_keys /home/abc/.ssh
-chown -R abc:abc /config/ssh/user_keys 2>/dev/null || true
+ln -sf /config/ssh/user_keys "/home/$USER_NAME/.ssh"
+chown -R "$USER_NAME:$USER_NAME" /config/ssh/user_keys 2>/dev/null || true
 
 # ============================================
 # Claude Code Profile Persistence
 # ============================================
 # Symlink Claude config directory for persistence
-if [ -d /home/abc/.claude ] && [ ! -L /home/abc/.claude ]; then
-    cp -rn /home/abc/.claude/* /config/claude-profile/ 2>/dev/null || true
-    rm -rf /home/abc/.claude
+if [ -d "/home/$USER_NAME/.claude" ] && [ ! -L "/home/$USER_NAME/.claude" ]; then
+    cp -rn "/home/$USER_NAME/.claude/"* /config/claude-profile/ 2>/dev/null || true
+    rm -rf "/home/$USER_NAME/.claude"
 fi
 
-ln -sf /config/claude-profile /home/abc/.claude
-chown -R abc:abc /config/claude-profile
+ln -sf /config/claude-profile "/home/$USER_NAME/.claude"
+chown -R "$USER_NAME:$USER_NAME" /config/claude-profile
 
 # ============================================
 # Password Configuration
 # ============================================
 if [ -n "$PASSWORD" ]; then
-    echo "[init-ssh-config] Setting password for user 'abc' from PASSWORD environment variable"
-    echo "abc:$PASSWORD" | chpasswd
+    echo "[init-ssh-config] Setting password for user '$USER_NAME' from PASSWORD environment variable"
+    echo "$USER_NAME:$PASSWORD" | chpasswd
 else
     # Generate random password if not provided
     RANDOM_PASS=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 16)
-    echo "abc:$RANDOM_PASS" | chpasswd
+    echo "$USER_NAME:$RANDOM_PASS" | chpasswd
     echo "============================================"
     echo "[init-ssh-config] WARNING: No PASSWORD env var set!"
-    echo "[init-ssh-config] Generated random password for 'abc': $RANDOM_PASS"
+    echo "[init-ssh-config] Generated random password for '$USER_NAME': $RANDOM_PASS"
     echo "[init-ssh-config] Set PASSWORD env var to use a custom password"
     echo "============================================"
 fi
 
-# Ensure abc user has a valid shell
-usermod -s /bin/bash abc 2>/dev/null || true
+# Ensure user has a valid shell
+usermod -s /bin/bash "$USER_NAME" 2>/dev/null || true
 
 echo "[init-ssh-config] SSH configuration complete"

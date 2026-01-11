@@ -12,7 +12,7 @@
     Features persistent SSH access for mobile AI interactions with your notes.
 
     [b]Default SSH Port:[/b] 2222 (internal)
-    [b]Default User:[/b] abc
+    [b]Default User:[/b] abc (configurable via USER_NAME)
 
     Access Obsidian via web browser at the Web GUI port.
     SSH into the container to use Claude Code from any terminal or mobile device.
@@ -32,5 +32,6 @@
   <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="User ID for file permissions" Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Group ID for file permissions" Type="Variable" Display="advanced" Required="false" Mask="false"/>
   <Config Name="TZ" Target="TZ" Default="America/New_York" Mode="" Description="Timezone" Type="Variable" Display="always" Required="false" Mask="false"/>
-  <Config Name="PASSWORD" Target="PASSWORD" Default="" Mode="" Description="Password for SSH user 'abc'. If not set, a random password will be generated and logged." Type="Variable" Display="always" Required="false" Mask="true"/>
+  <Config Name="USER_NAME" Target="USER_NAME" Default="abc" Mode="" Description="Username for SSH and Web GUI login. Default is 'abc'." Type="Variable" Display="always" Required="false" Mask="false"/>
+  <Config Name="PASSWORD" Target="PASSWORD" Default="" Mode="" Description="Password for the SSH/GUI user. If not set, a random password will be generated and logged." Type="Variable" Display="always" Required="false" Mask="true"/>
 </Container>
