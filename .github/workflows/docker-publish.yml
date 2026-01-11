@@ -13,7 +13,7 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/obsidian-claude
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/claude-obsidian
 
 jobs:
   build-and-test:
@@ -34,14 +34,14 @@ jobs:
         with:
           context: .
           load: true
-          tags: obsidian-claude:test
+          tags: claude-obsidian:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Run smoke tests
         run: |
           # Start container
-          docker run -d --name test-container obsidian-claude:test
+          docker run -d --name test-container claude-obsidian:test
 
           # Wait for container to initialize
           sleep 10

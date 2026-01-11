@@ -1,7 +1,7 @@
 # Obsidian + Claude Code Hybrid Container
 
-![Docker Pulls](https://img.shields.io/docker/pulls/bpk9/obsidian-claude)
-![Docker Image Size](https://img.shields.io/docker/image-size/bpk9/obsidian-claude)
+![Docker Pulls](https://img.shields.io/docker/pulls/bpk9/claude-obsidian)
+![Docker Image Size](https://img.shields.io/docker/image-size/bpk9/claude-obsidian)
 ![GitHub Stars](https://img.shields.io/github/stars/bpk9/claude-obsidian?style=social)
 ![License](https://img.shields.io/github/license/bpk9/claude-obsidian)
 
@@ -21,7 +21,7 @@ A "fat container" combining [Obsidian](https://obsidian.md/) (GUI knowledge base
 
 ```bash
 docker run -d \
-  --name obsidian-claude \
+  --name claude-obsidian \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=America/New_York \
@@ -29,7 +29,7 @@ docker run -d \
   -p 3000:3000 \
   -p 2222:2222 \
   -v /path/to/vault:/config \
-  bpk9/obsidian-claude:latest
+  bpk9/claude-obsidian:latest
 ```
 
 ### Docker Compose
@@ -37,9 +37,9 @@ docker run -d \
 ```yaml
 version: "3"
 services:
-  obsidian-claude:
-    image: bpk9/obsidian-claude:latest
-    container_name: obsidian-claude
+  claude-obsidian:
+    image: bpk9/claude-obsidian:latest
+    container_name: claude-obsidian
     environment:
       - PUID=1000
       - PGID=1000
@@ -62,6 +62,10 @@ Open your browser and navigate to:
 http://localhost:3000
 ```
 
+**Credentials:**
+- Username: `abc` (or leave blank)
+- Password: Value of `PASSWORD` env var
+
 ### SSH Access
 
 Connect via SSH to use Claude Code:
@@ -81,12 +85,12 @@ claude
 | `PUID` | User ID for file permissions | `1000` |
 | `PGID` | Group ID for file permissions | `1000` |
 | `TZ` | Timezone | `America/New_York` |
-| `PASSWORD` | SSH password for user `abc` | Random (logged) |
+| `PASSWORD` | Password for web GUI and SSH user `abc` | Random (logged) |
 
 | Port | Description |
 |------|-------------|
-| `3000` | KasmVNC Web Interface |
-| `3001` | KasmVNC HTTPS Interface |
+| `3000` | Selkies Web Interface |
+| `3001` | Selkies HTTPS Interface |
 | `2222` | SSH Access |
 
 | Volume | Description |
@@ -103,6 +107,18 @@ On first use, Claude Code requires authentication:
 4. Complete authentication in your browser
 5. Tokens are stored in `/config/claude-profile/` and persist across restarts
 
+## Creating Vaults
+
+Create your Obsidian vaults inside `/config` - this is the only directory that persists across container restarts/updates.
+
+**Options:**
+- **Single vault** - Use `/config` directly as your vault root
+- **Multiple vaults** - Create subdirectories like `/config/personal/`, `/config/work/`
+
+When you open Obsidian in the web GUI, it will prompt you to open or create a vault - point it to a folder within `/config`.
+
+**Important:** Anything stored outside `/config` will be lost when the container updates.
+
 ## Persistent Data
 
 The container stores persistent data in `/config`:
@@ -114,7 +130,9 @@ The container stores persistent data in `/config`:
 │   ├── ssh_host_rsa_key
 │   └── user_keys/    # User authorized_keys
 ├── claude-profile/   # Claude Code tokens and config
-└── [vault files]     # Your Obsidian vault
+└── my-vault/         # Your Obsidian vault(s)
+    ├── .obsidian/
+    └── notes/
 ```
 
 ## Security Recommendations
@@ -129,7 +147,7 @@ The container stores persistent data in `/config`:
 ```bash
 git clone https://github.com/bpk9/claude-obsidian.git
 cd claude-obsidian
-docker build -t obsidian-claude:local .
+docker build -t claude-obsidian:local .
 ```
 
 ## Unraid Installation
@@ -145,6 +163,6 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
 
-- [LinuxServer.io](https://linuxserver.io/) for the excellent Obsidian base image
+- [LinuxServer.io](https://linuxserver.io/) for the Selkies base image
 - [Anthropic](https://anthropic.com/) for Claude Code
 - [Obsidian](https://obsidian.md/) for the knowledge base application
