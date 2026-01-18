@@ -72,6 +72,20 @@ ln -sf /config/claude-profile "/home/$USER_NAME/.claude"
 chown -R "$USER_NAME:$USER_NAME" /config/claude-profile
 
 # ============================================
+# GitHub CLI Config Persistence
+# ============================================
+mkdir -p /config/gh-config
+mkdir -p "/home/$USER_NAME/.config"
+
+if [ -d "/home/$USER_NAME/.config/gh" ] && [ ! -L "/home/$USER_NAME/.config/gh" ]; then
+    cp -rn "/home/$USER_NAME/.config/gh/"* /config/gh-config/ 2>/dev/null || true
+    rm -rf "/home/$USER_NAME/.config/gh"
+fi
+
+ln -sf /config/gh-config "/home/$USER_NAME/.config/gh"
+chown -R "$USER_NAME:$USER_NAME" /config/gh-config
+
+# ============================================
 # Password Configuration
 # ============================================
 if [ -n "$PASSWORD" ]; then
